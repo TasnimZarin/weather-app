@@ -1,4 +1,4 @@
-# 🌤️ WeatherApp
+# 🌤️ WeatherApp — Real-time Weather with AI-powered Recommendations
 
 🌐 **Live App:** https://weather-app-sandy-five-60.vercel.app  
 🔧 **Backend API Docs:** https://weather-app-iuet.onrender.com/docs  
