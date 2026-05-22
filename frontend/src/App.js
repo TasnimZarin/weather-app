@@ -195,6 +195,9 @@ export default function App() {
           <h1 className="text-4xl font-bold text-white mb-2">
             🌤️ WeatherApp
           </h1>
+          <p className="text-blue-100 text-lg font-light mb-1">
+            Real-time weather with AI-powered recommendations
+          </p>
           <p className="text-blue-200 text-sm">
             Built by Zarin Tasnim | PM Accelerator
           </p>
