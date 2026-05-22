@@ -137,6 +137,7 @@ npm start
 
 ## 📁 Project Structure
 
+```plaintext
 weather-app/
 ├── backend/
 │   ├── main.py           # FastAPI endpoints (11 endpoints)
@@ -152,6 +153,7 @@ weather-app/
 │   ├── tailwind.config.js
 │   └── package.json
 └── README.md
+```
 
 ---
 
