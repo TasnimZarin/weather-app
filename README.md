@@ -104,10 +104,10 @@ pip install -r requirements.txt
 
 Create `.env` file in backend folder:
 
-OPENWEATHER_API_KEY=your_openweather_key
-GROQ_API_KEY=your_groq_key
-YOUTUBE_API_KEY=your_youtube_key
-DATABASE_URL=postgresql://username@localhost/weatherapp
+- OPENWEATHER_API_KEY=your_openweather_key
+- GROQ_API_KEY=your_groq_key
+- YOUTUBE_API_KEY=your_youtube_key
+- DATABASE_URL=postgresql://username@localhost/weatherapp
 
 Create database:
 ```bash
