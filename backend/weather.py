@@ -57,8 +57,6 @@ def get_coords_by_zip(zip_code: str, country_code: str):
     data = response.json()
     return data.get("lat"), data.get("lon")
 
-
-def get_coords_by_name(location: str):
 def get_coords_by_name(location: str):
     url = f"{GEO_URL}/direct"
     clean_location = location.replace(",", " ").strip()
