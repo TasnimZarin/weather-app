@@ -217,10 +217,6 @@ export default function App() {
       content = res.data.csv;
       mimeType = 'text/csv';
       extension = 'csv';
-    } else if (format === 'markdown') {
-      content = res.data.markdown;
-      mimeType = 'text/markdown';
-      extension = 'md';
     }
 
     const blob = new Blob([content], { type: mimeType });
@@ -234,19 +230,6 @@ export default function App() {
     showError('Could not export data. Please Try Again!');
   }
 };
-
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `weather-searches.${extension}`;
-    a.click();
-    showSuccess(`📥 Exported as ${format.toUpperCase()} successfully!`);
-  } catch (err) {
-    showError('Could not export data. Please Try Again!');
-  }
-};
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 p-4">
       <div className="max-w-4xl mx-auto">
