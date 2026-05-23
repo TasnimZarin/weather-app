@@ -493,13 +493,6 @@ export default function App() {
                 >
                   Refresh
                 </button>
-
-                <button
-                  onClick={() => exportData('markdown')}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700"
-                >
-                  Export MD
-                </button>
                               </div>
             </div>
 
