@@ -17,6 +17,8 @@ export default function App() {
   const [editLocation, setEditLocation] = useState('');
   const [videos, setVideos] = useState([]);
   const [recommendation, setRecommendation] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const getWeatherEmoji = (description) => {
   const desc = description?.toLowerCase() || '';
@@ -115,19 +117,32 @@ export default function App() {
   };
 
   const saveSearch = async () => {
-    if (!weather) return;
-    try {
-      await axios.post(`${API_BASE}/searches`, {
-        location: weather.location,
-        date_from: new Date().toISOString().split('T')[0],
-        date_to: new Date().toISOString().split('T')[0]
-      });
-      fetchSearches();
-      showSuccess('✅ Search saved successfully!');
-    } catch (err) {
-      showError('Could not save search');
-    }
-  };
+  if (!weather) return;
+
+  if (!dateFrom || !dateTo) {
+    showError('Please select both Date From and Date To');
+    return;
+  }
+
+  if (dateFrom > dateTo) {
+    showError('Date From must be before Date To');
+    return;
+  }
+
+  try {
+    await axios.post(`${API_BASE}/searches`, {
+      location: weather.location,
+      date_from: dateFrom,
+      date_to: dateTo
+    });
+    fetchSearches();
+    showSuccess('✅ Search saved successfully!');
+    setDateFrom('');
+    setDateTo('');
+  } catch (err) {
+    showError('Could not save search');
+  }
+};
 
   const fetchSearches = async () => {
     try {
@@ -305,13 +320,38 @@ export default function App() {
                   <p className="font-bold text-gray-800">{weather.wind_speed} m/s</p>
                 </div>
               </div>
-              <button
-                onClick={saveSearch}
-                className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-              >
-                💾 Save This Search
-              </button>
-            </div>
+<div className="mt-4 border-t border-gray-100 pt-4">
+  <p className="text-sm font-medium text-gray-600 mb-2">
+    💾 Save this search with a date range:
+  </p>
+  <div className="flex flex-col md:flex-row gap-2 mb-2">
+    <div className="flex-1">
+      <label className="text-xs text-gray-500">Date From</label>
+      <input
+        type="date"
+        value={dateFrom}
+        onChange={(e) => setDateFrom(e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+      />
+    </div>
+    <div className="flex-1">
+          <label className="text-xs text-gray-500">Date To</label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+          />
+        </div>
+      </div>
+      <button
+        onClick={saveSearch}
+        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+      >
+        💾 Save This Search
+      </button>
+    </div>
+                </div>
             {/* AI Recommendation */}
             {recommendation && (
               <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-6 shadow-lg text-white">
