@@ -21,18 +21,18 @@ export default function App() {
   const [dateTo, setDateTo] = useState('');
 
   const getWeatherEmoji = (description) => {
-  const desc = description?.toLowerCase() || '';
-  if (desc.includes('clear') || desc.includes('sunny')) return '☀️';
-  if (desc.includes('few clouds')) return '🌤️';
-  if (desc.includes('scattered clouds')) return '⛅';
-  if (desc.includes('broken clouds') || desc.includes('overcast')) return '☁️';
-  if (desc.includes('shower') || desc.includes('drizzle')) return '🌦️';
-  if (desc.includes('rain')) return '🌧️';
-  if (desc.includes('thunderstorm')) return '⛈️';
-  if (desc.includes('snow')) return '❄️';
-  if (desc.includes('mist') || desc.includes('fog') || desc.includes('haze')) return '🌫️';
-  return '🌡️';
-};
+    const desc = description?.toLowerCase() || '';
+    if (desc.includes('clear') || desc.includes('sunny')) return '☀️';
+    if (desc.includes('few clouds')) return '🌤️';
+    if (desc.includes('scattered clouds')) return '⛅';
+    if (desc.includes('broken clouds') || desc.includes('overcast')) return '☁️';
+    if (desc.includes('shower') || desc.includes('drizzle')) return '🌦️';
+    if (desc.includes('rain')) return '🌧️';
+    if (desc.includes('thunderstorm')) return '⛈️';
+    if (desc.includes('snow')) return '❄️';
+    if (desc.includes('mist') || desc.includes('fog') || desc.includes('haze')) return '🌫️';
+    return '🌡️';
+  };
 
   const fetchYouTubeVideos = async (locationName) => {
     try {
@@ -46,15 +46,15 @@ export default function App() {
   };
 
   const fetchRecommendation = async (locationName) => {
-  try {
-    const res = await axios.get(`${API_BASE}/weather/recommend`, {
-      params: { location: locationName }
-    });
-    setRecommendation(res.data.recommendation);
-  } catch (err) {
-    console.log('Could not fetch recommendation. Please Try Again!');
-  }
-};
+    try {
+      const res = await axios.get(`${API_BASE}/weather/recommend`, {
+        params: { location: locationName }
+      });
+      setRecommendation(res.data.recommendation);
+    } catch (err) {
+      console.log('Could not fetch recommendation. Please Try Again!');
+    }
+  };
 
   const showSuccess = (message) => {
     setSuccess(message);
@@ -71,6 +71,13 @@ export default function App() {
       showError('Please enter a location');
       return;
     }
+    // Clear stale data immediately
+    setWeather(null);
+    setForecast(null);
+    setHourly(null);
+    setRecommendation('');
+    setVideos([]);
+    setActiveTab('weather');
     setLoading(true);
     setError('');
     try {
@@ -96,6 +103,13 @@ export default function App() {
       showError('Geolocation is not supported by your browser!');
       return;
     }
+    // Clear stale data immediately
+    setWeather(null);
+    setForecast(null);
+    setHourly(null);
+    setRecommendation('');
+    setVideos([]);
+    setActiveTab('weather');
     setLoading(true);
     navigator.geolocation.getCurrentPosition(async (position) => {
       const { latitude, longitude } = position.coords;
@@ -117,32 +131,32 @@ export default function App() {
   };
 
   const saveSearch = async () => {
-  if (!weather) return;
+    if (!weather) return;
 
-  if (!dateFrom || !dateTo) {
-    showError('Please select both Date From and Date To');
-    return;
-  }
+    if (!dateFrom || !dateTo) {
+      showError('Please select both Date From and Date To');
+      return;
+    }
 
-  if (dateFrom > dateTo) {
-    showError('Date From must be before Date To');
-    return;
-  }
+    if (dateFrom > dateTo) {
+      showError('Date From must be before Date To');
+      return;
+    }
 
-  try {
-    await axios.post(`${API_BASE}/searches`, {
-      location: weather.location,
-      date_from: dateFrom,
-      date_to: dateTo
-    });
-    fetchSearches();
-    showSuccess('✅ Search saved successfully!');
-    setDateFrom('');
-    setDateTo('');
-  } catch (err) {
-    showError('Could not save search');
-  }
-};
+    try {
+      await axios.post(`${API_BASE}/searches`, {
+        location: weather.location,
+        date_from: dateFrom,
+        date_to: dateTo
+      });
+      fetchSearches();
+      showSuccess('✅ Search saved successfully!');
+      setDateFrom('');
+      setDateTo('');
+    } catch (err) {
+      showError('Could not save search');
+    }
+  };
 
   const fetchSearches = async () => {
     try {
@@ -269,28 +283,30 @@ export default function App() {
           </div>
         )}
 
-        {/* Tabs */}
-        {weather && (
-          <div className="flex gap-2 mb-4">
-            {['weather', 'searches', 'map', 'videos'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg capitalize font-medium transition ${
-                  activeTab === tab
-                    ? 'bg-white text-blue-600'
-                    : 'bg-blue-700 text-white hover:bg-blue-800'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Tabs — show even without weather so Searches tab is always accessible */}
+        <div className="flex gap-2 mb-4">
+          {['weather', 'searches', 'map', 'videos'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                if (tab === 'searches') fetchSearches();
+              }}
+              className={`px-4 py-2 rounded-lg capitalize font-medium transition ${
+                activeTab === tab
+                  ? 'bg-white text-blue-600'
+                  : 'bg-blue-700 text-white hover:bg-blue-800'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
         {/* Weather Tab */}
         {activeTab === 'weather' && weather && (
           <div className="space-y-4">
+            {/* Current Weather Card */}
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <div className="flex justify-between items-start">
                 <div>
@@ -306,6 +322,8 @@ export default function App() {
                   {getWeatherEmoji(weather.description)}
                 </span>
               </div>
+
+              {/* Stats */}
               <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
                 <div className="text-center">
                   <p className="text-gray-500 text-sm">Feels Like</p>
@@ -320,38 +338,41 @@ export default function App() {
                   <p className="font-bold text-gray-800">{weather.wind_speed} m/s</p>
                 </div>
               </div>
-<div className="mt-4 border-t border-gray-100 pt-4">
-  <p className="text-sm font-medium text-gray-600 mb-2">
-    💾 Save this search with a date range:
-  </p>
-  <div className="flex flex-col md:flex-row gap-2 mb-2">
-    <div className="flex-1">
-      <label className="text-xs text-gray-500">Date From</label>
-      <input
-        type="date"
-        value={dateFrom}
-        onChange={(e) => setDateFrom(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-      />
-    </div>
-    <div className="flex-1">
-          <label className="text-xs text-gray-500">Date To</label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-          />
-        </div>
-      </div>
-      <button
-        onClick={saveSearch}
-        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-      >
-        💾 Save This Search
-      </button>
-    </div>
+
+              {/* Date Range + Save */}
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <p className="text-sm font-medium text-gray-600 mb-2">
+                  💾 Save this search with a date range:
+                </p>
+                <div className="flex flex-col md:flex-row gap-2 mb-2">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500">Date From</label>
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500">Date To</label>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
                 </div>
+                <button
+                  onClick={saveSearch}
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  💾 Save This Search
+                </button>
+              </div>
+            </div>
+
             {/* AI Recommendation */}
             {recommendation && (
               <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-6 shadow-lg text-white">
@@ -359,6 +380,7 @@ export default function App() {
                 <p className="text-white text-sm leading-relaxed">{recommendation}</p>
               </div>
             )}
+
             {/* Hourly Forecast */}
             {hourly && (
               <div className="bg-white rounded-2xl p-6 shadow-lg">
@@ -408,6 +430,13 @@ export default function App() {
           </div>
         )}
 
+        {/* Weather Tab — no result yet */}
+        {activeTab === 'weather' && !weather && !loading && (
+          <div className="text-center text-blue-100 py-16 text-lg">
+            🔍 Search for a city to see the weather
+          </div>
+        )}
+
         {/* Searches Tab */}
         {activeTab === 'searches' && (
           <div className="bg-white rounded-2xl p-6 shadow-lg">
@@ -434,51 +463,50 @@ export default function App() {
                 </button>
               </div>
             </div>
+
             {searches.length === 0 ? (
               <p className="text-gray-500 text-center py-8">
-                No saved searches yet. Search for a city and click "Save This Search".
+                No saved searches yet. Search for a city and save it with a date range.
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="text-left p-2">Location</th>
-                      <th className="text-left p-2">Temp</th>
-                      <th className="text-left p-2">Description</th>
-                      <th className="text-left p-2">Date From</th>
-                      <th className="text-left p-2">Date To</th>
-                      <th className="text-left p-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {searches.map(search => (
-                      <tr key={search.id} className="border-t border-gray-100">
-                        <td className="p-2">{search.location}, {search.country}</td>
-                        <td className="p-2">{Math.round(search.temperature)}°C</td>
-                        <td className="p-2 capitalize">{search.description}</td>
-                        <td className="p-2">{search.date_from}</td>
-                        <td className="p-2">{search.date_to}</td>
-                        <td className="p-2">
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => startEdit(search)}
-                              className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteSearch(search.id)}
-                              className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-3">
+                {searches.map(search => (
+                  <div key={search.id} className="border border-gray-100 rounded-xl p-4 bg-blue-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-bold text-gray-800 text-lg">
+                          {search.location}{search.country ? `, ${search.country}` : ''}
+                        </p>
+                        <p className="text-blue-600 font-bold text-2xl">
+                          {search.temperature ? `${Math.round(search.temperature)}°C` : '—'}
+                        </p>
+                        <div className="flex gap-4 mt-1 text-sm text-gray-500">
+                          {search.feels_like && <span>Feels like {Math.round(search.feels_like)}°C</span>}
+                          {search.humidity && <span>💧 {search.humidity}%</span>}
+                          {search.wind_speed && <span>💨 {search.wind_speed} m/s</span>}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1 capitalize">{search.description}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          📅 {search.date_from} → {search.date_to}
+                        </p>
+                      </div>
+                      <div className="flex gap-1 flex-col">
+                        <button
+                          onClick={() => startEdit(search)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => deleteSearch(search.id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -536,6 +564,12 @@ export default function App() {
           </div>
         )}
 
+        {activeTab === 'map' && !weather && (
+          <div className="text-center text-blue-100 py-16 text-lg">
+            🗺️ Search for a location first to see the map
+          </div>
+        )}
+
         {/* Videos Tab */}
         {activeTab === 'videos' && weather && (
           <div className="bg-white rounded-2xl p-6 shadow-lg">
@@ -573,6 +607,12 @@ export default function App() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'videos' && !weather && (
+          <div className="text-center text-blue-100 py-16 text-lg">
+            📺 Search for a location first to see videos
           </div>
         )}
 
