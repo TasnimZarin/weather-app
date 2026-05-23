@@ -93,7 +93,7 @@ export default function App() {
       fetchYouTubeVideos(weatherRes.data.location);
       fetchRecommendation(weatherRes.data.location);
     } catch (err) {
-      showError('City not found. Please check the spelling and try again.');
+      showError('City not found. Please try again.');
     }
     setLoading(false);
   };
@@ -124,7 +124,12 @@ export default function App() {
         fetchYouTubeVideos(res.data.current.location);
         fetchRecommendation(res.data.current.location);
       } catch (err) {
-        showError('Could not get weather for your location. Please Try Again!');
+        setWeather(null);
+        setForecast(null);
+        setHourly(null);
+        setRecommendation('');
+        setVideos([]);
+        showError('Location not found. Please try a different city, zip code, or coordinates.');
       }
       setLoading(false);
     });
@@ -198,22 +203,37 @@ export default function App() {
   };
 
   const exportData = async (format) => {
-    try {
-      const res = await axios.get(`${API_BASE}/searches/export/${format}`);
-      const blob = new Blob(
-        [format === 'json' ? JSON.stringify(res.data, null, 2) : res.data.csv],
-        { type: format === 'json' ? 'application/json' : 'text/csv' }
-      );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `weather-searches.${format}`;
-      a.click();
-      showSuccess(`📥 Data exported as ${format.toUpperCase()} successfully!`);
-    } catch (err) {
-      showError('Could not export data. Please Try Again!');
+  try {
+    const res = await axios.get(`${API_BASE}/searches/export/${format}`);
+    let content;
+    let mimeType;
+    let extension;
+
+    if (format === 'json') {
+      content = JSON.stringify(res.data, null, 2);
+      mimeType = 'application/json';
+      extension = 'json';
+    } else if (format === 'csv') {
+      content = res.data.csv;
+      mimeType = 'text/csv';
+      extension = 'csv';
+    } else if (format === 'markdown') {
+      content = res.data.markdown;
+      mimeType = 'text/markdown';
+      extension = 'md';
     }
-  };
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `weather-searches.${extension}`;
+    a.click();
+    showSuccess(`📥 Exported as ${format.toUpperCase()} successfully!`);
+  } catch (err) {
+    showError('Could not export data. Please Try Again!');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 p-4">
@@ -461,7 +481,14 @@ export default function App() {
                 >
                   Refresh
                 </button>
-              </div>
+
+                <button
+                  onClick={() => exportData('markdown')}
+                  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700"
+                >
+                  Export MD
+                </button>
+                              </div>
             </div>
 
             {searches.length === 0 ? (

@@ -59,17 +59,21 @@ def get_coords_by_zip(zip_code: str, country_code: str):
 
 
 def get_coords_by_name(location: str):
-    """Use OpenWeatherMap geocoding API — handles city names and landmarks"""
+def get_coords_by_name(location: str):
     url = f"{GEO_URL}/direct"
+    clean_location = location.replace(",", " ").strip()
     params = {
-        "q": location,
+        "q": clean_location,
         "limit": 1,
         "appid": API_KEY
     }
     response = requests.get(url, params=params)
-    if response.status_code != 200 or not response.json():
-        return None
-    data = response.json()[0]
+    if response.status_code != 200:
+        return None, None
+    results = response.json()
+    if not results:
+        return None, None
+    data = results[0]
     return data.get("lat"), data.get("lon")
 
 
