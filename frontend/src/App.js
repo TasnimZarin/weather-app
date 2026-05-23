@@ -470,12 +470,6 @@ export default function App() {
                 >
                   Export CSV
                 </button>
-                <button
-                  onClick={fetchSearches}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700"
-                >
-                  Refresh
-                </button>
                               </div>
             </div>
 
